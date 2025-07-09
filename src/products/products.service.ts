@@ -88,17 +88,17 @@ export class ProductsService {
 
 
 
-async findByCategory(categoryId: number) {
-  return await this.prisma.product.findMany({
-    where: {
-      category_id: categoryId,
-    },
-    take: 5,
-    include: {
-      variations: true,
-    },
-  });
-}
+  async findByCategory(categoryId: number) {
+    return await this.prisma.product.findMany({
+      where: {
+        category_id: categoryId,
+      },
+      take: 5,
+      include: {
+        variations: true,
+      },
+    });
+  }
 
 
   findOne(id: number) {
