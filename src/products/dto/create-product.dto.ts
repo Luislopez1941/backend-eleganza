@@ -1,8 +1,17 @@
-// create-product.dto.ts
-import { IsString, IsNotEmpty, IsOptional, IsObject, ValidateNested, IsNumber } from 'class-validator';
+// src/products/dto/create-product.dto.ts
+
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsObject,
+  ValidateNested,
+  IsNumber,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
-class VariationDto {
+export class VariationDto {
   @IsString()
   @IsNotEmpty()
   color: string;
@@ -15,24 +24,40 @@ class VariationDto {
   quantity: number;
 }
 
+export class VariationCreateDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => VariationDto)
+  create: VariationDto[];
+}
+
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @IsOptional()
-  images?: string[]; // base64 strings
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
+
+  @IsOptional()
+  @IsString()
+  image?: string;
 
   @IsString()
   @IsNotEmpty()
   status: string;
 
   @IsOptional()
-  category_id?: number;
-
-  // Ahora variations es un objeto cuyas propiedades son VariationDto
   @IsObject()
-  @ValidateNested({ each: true })
-  @Type(() => VariationDto)
-  variations: { [key: string]: VariationDto };
+  category?: {
+    connect: { id: number };
+  };
+
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => VariationCreateDto)
+  variations?: VariationCreateDto;
 }

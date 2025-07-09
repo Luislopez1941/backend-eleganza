@@ -13,18 +13,21 @@ export class ProductsController {
       // Llamas al servicio con el DTO completo que ya valida y procesa
       return this.productsService.create(createProductDto)
     } catch (error) {
-      
+
     }
   }
-  @Get()
-  findAll() {
-    return this.productsService.findAll();
+  
+  @Get('category/:id')
+  async getByCategory(@Param('id') id: string) {
+    const categoryId = parseInt(id, 10);
+    return this.productsService.findByCategory(categoryId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(+id);
   }
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {

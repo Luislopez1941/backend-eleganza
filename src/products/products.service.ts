@@ -10,10 +10,17 @@ import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class ProductsService {
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
- async create(createProductDto: CreateProductDto) {
-    const { name, images: base64Images = [], status, category_id, variations = {} } = createProductDto;
+  async create(createProductDto: CreateProductDto) {
+    const {
+      name,
+      images: base64Images = [],
+      image,
+      status,
+      category,
+      variations,
+    } = createProductDto;
 
     // Carpeta donde guardar las imágenes
     const uploadDir = path.join(process.cwd(), 'uploads', 'products');
@@ -38,25 +45,29 @@ export class ProductsService {
       return `/uploads/products/${filename}`;
     });
 
-    // Convertir variations objeto a array
-    const variationsArray = Object.values(variations);
+    // Generar array de variaciones
+    const variationsArray = (variations?.create || []).map((v) => ({
+      color: v.color,
+      size: v.size,
+      quantity: v.quantity,
+    }));
 
-    // Preparar datos para crear producto
+    // Preparar objeto para Prisma
     const productData: any = {
       name,
       images: savedImagePaths,
       status,
       variations: {
-        create: variationsArray.map((v) => ({
-          color: v.color,
-          size: v.size,
-          quantity: v.quantity,
-        })),
+        create: variationsArray,
       },
     };
 
-    if (category_id) {
-      productData.category = { connect: { id: category_id } };
+    if (image) {
+      productData.image = image;
+    }
+
+    if (category) {
+      productData.category = category;
     }
 
     const product = await this.prisma.product.create({
@@ -74,9 +85,16 @@ export class ProductsService {
   }
 
 
-  findAll() {
-    return `This action returns all products`;
+
+  async findByCategory(categoryId: number) {
+    return await this.prisma.product.findMany({
+      where: {
+        category_id: categoryId,
+      },
+      take: 5, // máximo 5 productos
+    });
   }
+
 
   findOne(id: number) {
     return `This action returns a #${id} product`;
