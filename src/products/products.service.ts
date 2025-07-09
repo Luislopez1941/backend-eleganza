@@ -18,6 +18,7 @@ export class ProductsService {
       images: base64Images = [],
       image,
       status,
+      price,
       category,
       variations,
     } = createProductDto;
@@ -55,6 +56,7 @@ export class ProductsService {
     // Preparar objeto para Prisma
     const productData: any = {
       name,
+      price,
       images: savedImagePaths,
       status,
       variations: {
@@ -86,14 +88,17 @@ export class ProductsService {
 
 
 
-  async findByCategory(categoryId: number) {
-    return await this.prisma.product.findMany({
-      where: {
-        category_id: categoryId,
-      },
-      take: 5, // máximo 5 productos
-    });
-  }
+async findByCategory(categoryId: number) {
+  return await this.prisma.product.findMany({
+    where: {
+      category_id: categoryId,
+    },
+    take: 5,
+    include: {
+      variations: true,
+    },
+  });
+}
 
 
   findOne(id: number) {

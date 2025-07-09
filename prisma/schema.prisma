@@ -62,6 +62,7 @@ model category {
 model product {
   id            Int                   @id @default(autoincrement())
   name          String
+  price         Decimal
   images        Json
   status        Boolean
   createdAt     DateTime              @default(now())

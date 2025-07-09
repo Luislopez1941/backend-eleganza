@@ -36,6 +36,10 @@ export class CreateProductDto {
   @IsNotEmpty()
   name: string;
 
+  @IsNumber()
+  @IsNotEmpty()
+  price: number;
+
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
