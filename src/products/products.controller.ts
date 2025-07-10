@@ -16,20 +16,14 @@ export class ProductsController {
 
     }
   }
-  
+
   @Get('category/:id')
   async getByCategory(@Param('id') id: string) {
     const categoryId = parseInt(id, 10);
     return this.productsService.findByCategory(categoryId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
-  }
-
-
-  @Patch(':id')
+  @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productsService.update(+id, updateProductDto);
   }
@@ -38,4 +32,5 @@ export class ProductsController {
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);
   }
+
 }

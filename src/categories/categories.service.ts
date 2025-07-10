@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -83,14 +83,74 @@ export class CategoriesService {
     };
   }
 
+ async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+  const { name, image, gender, status, sub_menu, store_id, delete_image } = updateCategoryDto;
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  const category = await this.prisma.category.findUnique({
+    where: { id },
+  });
+
+  if (!category) {
+    throw new NotFoundException(`La categoría con id ${id} no existe`);
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  // ✅ Si viene delete_image, elimina el archivo
+  if (delete_image) {
+    const imageToDelete = path.join(process.cwd(), delete_image);
+    if (fs.existsSync(imageToDelete)) {
+      fs.unlinkSync(imageToDelete);
+    }
   }
+
+  let imageUrl = category.image;
+
+  if (image) {
+    const matches = image.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (!matches) {
+      throw new Error('Imagen base64 inválida');
+    }
+
+    const ext = matches[1].split('/')[1];
+    const base64Data = matches[2];
+    const fileName = `${Date.now()}.${ext}`;
+    const uploadDir = path.join(process.cwd(), 'uploads', 'categories');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    const filePath = path.join(uploadDir, fileName);
+
+    fs.writeFileSync(filePath, base64Data, { encoding: 'base64' });
+    imageUrl = `/uploads/categories/${fileName}`;
+  }
+
+  let subMenuParsed: any = undefined;
+  if (sub_menu) {
+    try {
+      subMenuParsed = JSON.parse(sub_menu);
+    } catch {
+      subMenuParsed = null;
+    }
+  }
+
+  const updatedCategory = await this.prisma.category.update({
+    where: { id },
+    data: {
+      name,
+      image: imageUrl,
+      gender,
+      status,
+      sub_menu: subMenuParsed,
+      store_id,
+    },
+  });
+
+  return {
+    data: updatedCategory,
+    status: 'success',
+    message: 'Categoría actualizada exitosamente',
+  };
+}
+
 
   remove(id: number) {
     return `This action removes a #${id} category`;
