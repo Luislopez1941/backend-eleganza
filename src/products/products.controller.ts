@@ -17,11 +17,32 @@ export class ProductsController {
     }
   }
 
+
   @Get('category/:id')
   async getByCategory(@Param('id') id: string) {
     const categoryId = parseInt(id, 10);
     return this.productsService.findByCategory(categoryId);
   }
+
+  @Get('get/all')
+  async getAllProducts() {
+    const products = await this.productsService.findAll();
+    return {
+      status: 'success',
+      data: products,
+    };
+  }
+
+
+  @Get('three/category/:categoryId')
+  async getThreeProductsByCategory(@Param('categoryId') categoryId: number) {
+    const products = await this.productsService.findThreeByCategory(Number(categoryId));
+    return {
+      status: 'success',
+      data: products,
+    };
+  }
+
 
   @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {

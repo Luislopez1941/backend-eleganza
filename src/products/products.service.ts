@@ -94,8 +94,27 @@ export class ProductsService {
     return await this.prisma.product.findMany({
       where: {
         category_id: categoryId,
+      },     
+      include: {
+        variations: true,
       },
-      take: 5,
+    });
+  }
+
+  async findAll() {
+  return await this.prisma.product.findMany({
+    include: {
+      variations: true,
+    },
+  });
+}
+
+async findThreeByCategory(categoryId: number) {
+    return await this.prisma.product.findMany({
+      where: {
+        category_id: categoryId,
+      },
+      take: 3,
       include: {
         variations: true,
       },
